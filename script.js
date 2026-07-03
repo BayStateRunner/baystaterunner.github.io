@@ -55,13 +55,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const formSuccess = document.getElementById('formSuccess');
 
   if(contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault(); // Prevent page reload
       
-      // todo
-      
-      contactForm.classList.add('hidden');
-      formSuccess.classList.remove('hidden');
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        if (response.ok) {
+          contactForm.classList.add('hidden');
+          formSuccess.classList.remove('hidden');
+        } else {
+          alert('There was an issue sending your message. Please try again or call us.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('There was an issue sending your message. Please try again or call us.');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
     });
   }
 });
